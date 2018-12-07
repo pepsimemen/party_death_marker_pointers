@@ -9,7 +9,7 @@ tera-proxy module that spawns colored pointy arrows on top of dead party members
 ### `markers.toparty`
 - Death Markers will be visible to all party members (requires leadership)
 - Toggle on/off
-- Default is off (only visible by you)
+- Default is off (only visible to you)
 
 ## Info
 - Tanks = red. Healers = blue. DPS = yellow.
