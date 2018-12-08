@@ -24,7 +24,7 @@ const JobSpecificMarkers = [
 
 module.exports = function PartyDeathMarkers (dispatch) {
 
-	const command = dispatch.command || dispatch.require.command
+	const command = dispatch.command
 	let delay = 500
 	let enabled = true
 	let toparty = false
@@ -63,7 +63,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		if(mpos !== -1)
 		{
 			//console.log(`delete array marker for ${String(Markers[mpos].target)}`)
-			//console.log(`d number of marks ${Markers.length}; number of dead ${deadPeople.length}`)
+			//console.log(`clear F: number of marks ${Markers.length}; number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
 			Markers.splice(mpos, 1)
 			clearTimeout(timer)
 			timer = setTimeout(UpdateMarkers, delay)
@@ -74,10 +74,10 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		}
 		else
 		{
-			console.log("weird stuff, can't find marker for the dead: marker array:")
-			console.log(Markers)
-			console.log("weird stuff, can't find marker for the dead: party array:")
-			console.log(partyMembers)
+			//console.log("weird stuff, can't find marker for the dead: marker array:")
+			//console.log(Markers)
+			//console.log("weird stuff, can't find marker for the dead: party array:")
+			//console.log(partyMembers)
 		}
 	}
 
@@ -114,7 +114,9 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	command.add('upd', () => {
 		UpdateMarkers()
 		command.message('Update Markers ')
+		command.message(`number of marks ${Markers.length}, number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
 		//console.log('Update Markers ')
+		//console.log(`UPD: number of marks ${Markers.length}, number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
 	})*/
 	
 	const checkLeader = (Id) => {
@@ -124,6 +126,37 @@ module.exports = function PartyDeathMarkers (dispatch) {
 			if(toparty && enabled)
 			{
 				command.message('You are the Leader of the party, death Markers will be visible to all party members now')
+			}
+		}
+	}
+	
+	const DeadOrAlive = ({gameId, alive}) => {
+		if(alive)
+		{
+			//console.log(`someone revived ${String(gameId)}n`)
+			clearMarkerById(gameId)
+		}
+		else
+		{
+			//console.log(`someone died ${String(gameId)}n`)
+			const member = partyMembers.find((memb) => memb.gameId === gameId)
+			if (!member) return;
+			if (deadPeople.indexOf(gameId) === -1)
+			{
+				Markers.push({color: getMarkColor(member.class), target: gameId})
+				deadPeople.push(gameId)
+				//console.log(`new mark for ${member.name}, id: ${String(gameId)}n`)
+				//console.log(`number of marks ${Markers.length}, number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
+				//console.log("DEBUG: marker array:")
+				//console.log(Markers)
+				//console.log("DEBUG: dead array:")
+				//console.log(deadPeople)
+				clearTimeout(timer)
+				setTimeout(UpdateMarkers, delay)
+			}
+			else
+			{
+				//console.log("NOTE: Died while already being dead?")
 			}
 		}
 	}
@@ -145,41 +178,19 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		partyMembers = members
 		//console.log(`in party with ${partyMembers.length}`)
 	})
-
-	dispatch.hook('S_CREATURE_LIFE', 3, ({gameId, alive}) => {
-		if(alive)
-		{
-			//console.log(`someone revived ${String(gameId)}`)
-			clearMarkerById(gameId)
-		}
-		else
-		{
-			//console.log(`someone died ${String(gameId)}`)
-			const member = partyMembers.find((memb) => memb.gameId === gameId)
-			if (!member) return;
-			if (deadPeople.indexOf(gameId) === -1)
-			{
-				Markers.push({color: getMarkColor(member.class), target: gameId})
-				deadPeople.push(gameId)
-				//console.log(`new mark for ${member.name}, id: ${String(gameId)}`)
-				//console.log(`number of marks ${Markers.length}, number of dead ${deadPeople.length}`)
-				//console.log("DEBUG: marker array:")
-				//console.log(Markers)
-				//console.log("DEBUG: dead array:")
-				//console.log(deadPeople)
-				clearTimeout(timer)
-				setTimeout(UpdateMarkers, delay)
-			}
-		}
-	})
+	
+	dispatch.hook('S_SPAWN_ME', 3, DeadOrAlive)
+	dispatch.hook('S_SPAWN_USER', 13, DeadOrAlive)
+	dispatch.hook('S_CREATURE_LIFE', 3, DeadOrAlive)
 
 	dispatch.hook('S_LEAVE_PARTY_MEMBER', 2, ({playerId}) => {
-		//console.log(`in party with ${partyMembers.length} people, someone left`)
-		const member = partyMembers.find((memb) => memb.playerId === playerId)
-		if (!member) return;
-		//console.log("S_LEAVE_PARTY_MEMBER " + String(member.gameId))
-		clearMarkerById(member.gameId)
-		partyMembers = partyMembers.filter((memb) => memb.playerId === playerId)
+		//console.log(`was in party with ${partyMembers.length} people, someone left`)
+		const mpos = partyMembers.findIndex((memb) => memb.playerId === playerId)
+		if (mpos === -1) return;
+		//console.log("S_LEAVE_PARTY_MEMBER " + String(partyMembers[mpos].gameId))
+		clearMarkerById(partyMembers[mpos].gameId)
+		partyMembers.splice(mpos, 1)
+		//console.log(`now in party with ${partyMembers.length} people, without him`)
 	})
 
 	dispatch.hook('S_LEAVE_PARTY', 'raw', () => {
@@ -187,6 +198,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		deadPeople.length = 0
 		Markers.length = 0
 		isLeader = false
+		//console.log("Left the party")
 		UpdateMarkers()
 	})
 }

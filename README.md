@@ -15,4 +15,4 @@ tera-proxy module that spawns colored pointy arrows on top of dead party members
 - Tanks = red. Healers = blue. DPS = yellow.
 
 
-![Screenshot](http://u.cubeupload.com/Owyn/TERAScreenShot201812.png)
+![Screenshot](http://u.cubeupload.com/Owyn/markers.png)

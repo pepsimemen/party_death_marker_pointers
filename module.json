@@ -3,7 +3,6 @@
 	"name": "party_death_marker_pointers",
 	"author": "Owyn",
 	"description": "Spawns colored pointy arrows on top of dead party members",
-	"version": "Yes",
 	"options": {
 		"niceName": "Death Markers"
 	},
