@@ -58,10 +58,10 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	const clearMarkerById = (id) => {
 		const wasdead = deadPeople.indexOf(id)
 		if (wasdead === -1) return;
-		console.log(`dead pos clearing # ${wasdead} for ${String(deadPeople[wasdead])}n`)
+		//console.log(`dead pos clearing # ${wasdead} for ${String(deadPeople[wasdead])}n`)
 		deadPeople.splice(wasdead, 1)
 		const mpos = Markers.findIndex((mar) => mar.target === id)
-		console.log(`delete array marker at # ${mpos}`)
+		//console.log(`delete array marker at # ${mpos}`)
 		if(mpos !== -1)
 		{
 			//console.log(`delete array marker for ${String(Markers[mpos].target)}n`)
