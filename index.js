@@ -32,22 +32,24 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	let myID = null
 	let timer = null
 	let Markers = []
+	let RealMarkers = []
 	let deadPeople = []
 	let partyMembers = []
 	
 	const UpdateMarkers = () => {
 		if(enabled)
 		{
+			const markers_to_send = (RealMarkers.length ? RealMarkers.concat(Markers) : Markers)
 			if(toparty && isLeader)
 			{
 				dispatch.toServer('C_PARTY_MARKER', 1, {
-					markers: Markers
+					markers: markers_to_send
 				})
 			}
 			else
 			{
 				dispatch.toClient('S_PARTY_MARKER', 1, {
-					markers: Markers
+					markers: markers_to_send
 				})
 			}
 		}
@@ -56,17 +58,17 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	const clearMarkerById = (id) => {
 		const wasdead = deadPeople.indexOf(id)
 		if (wasdead === -1) return;
-		//console.log(`dead pos clearing # ${wasdead} for ${String(deadPeople[wasdead])}`)
+		console.log(`dead pos clearing # ${wasdead} for ${String(deadPeople[wasdead])}n`)
 		deadPeople.splice(wasdead, 1)
 		const mpos = Markers.findIndex((mar) => mar.target === id)
-		//console.log(`delete array marker at # ${mpos}`)
+		console.log(`delete array marker at # ${mpos}`)
 		if(mpos !== -1)
 		{
-			//console.log(`delete array marker for ${String(Markers[mpos].target)}`)
-			//console.log(`clear F: number of marks ${Markers.length}; number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
+			//console.log(`delete array marker for ${String(Markers[mpos].target)}n`)
 			Markers.splice(mpos, 1)
 			clearTimeout(timer)
 			timer = setTimeout(UpdateMarkers, delay)
+			//console.log(`clear F: number of marks ${Markers.length}; number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
 			//console.log("DEBUG remove: marker array:")
 			//console.log(Markers)
 			//console.log("DEBUG remove: dead array:")
@@ -102,7 +104,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		command.message(toparty ? 'Death Markers will be visible to all party members (requires leadership)' : 'Only you will be able to see Death Markers')
 	})
 	
-	/*command.add('delay', (arg) => {
+	command.add('delay', (arg) => {
 		if(arg)
 		{
 			delay = parseInt(arg, 10)
@@ -117,7 +119,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		command.message(`number of marks ${Markers.length}, number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
 		//console.log('Update Markers ')
 		//console.log(`UPD: number of marks ${Markers.length}, number of dead ${deadPeople.length}, number of party ${partyMembers.length}`)
-	})*/
+	})
 	
 	const checkLeader = (Id) => {
 		if(myID === Id)
@@ -169,6 +171,12 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		myID = playerId
     })
 	
+	dispatch.hook('S_PARTY_MARKER', 1, {order: 100, filter: {fake: null}}, ({markers}) => {	
+		RealMarkers = markers
+		//console.log("S_PARTY_MARKER")
+		//console.log(markers)
+    })
+	
 	dispatch.hook('S_CHANGE_PARTY_MANAGER', 2, ({playerId}) => {
         checkLeader(playerId)
     })
@@ -186,8 +194,12 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	dispatch.hook('S_LEAVE_PARTY_MEMBER', 2, ({playerId}) => {
 		//console.log(`was in party with ${partyMembers.length} people, someone left`)
 		const mpos = partyMembers.findIndex((memb) => memb.playerId === playerId)
-		if (mpos === -1) return;
-		//console.log("S_LEAVE_PARTY_MEMBER " + String(partyMembers[mpos].gameId))
+		if (mpos === -1) 
+		{
+			//console.log("Warning: Party member left, but he was not found in the party before... " + playerId)
+			return
+		}
+		//console.log("S_LEAVE_PARTY_MEMBER " + String(partyMembers[mpos].gameId) + "n")
 		clearMarkerById(partyMembers[mpos].gameId)
 		partyMembers.splice(mpos, 1)
 		//console.log(`now in party with ${partyMembers.length} people, without him`)
