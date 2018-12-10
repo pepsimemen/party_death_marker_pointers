@@ -31,6 +31,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	let isLeader = false
 	let myID = null
 	let timer = null
+	let sending = false
 	let Markers = []
 	let RealMarkers = []
 	let deadPeople = []
@@ -40,6 +41,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		if(enabled)
 		{
 			const markers_to_send = (RealMarkers.length ? RealMarkers.concat(Markers) : Markers)
+			sending = true
 			if(toparty && isLeader)
 			{
 				dispatch.toServer('C_PARTY_MARKER', 1, {
@@ -52,6 +54,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 					markers: markers_to_send
 				})
 			}
+			sending = false
 		}
 	}
 	
@@ -171,10 +174,13 @@ module.exports = function PartyDeathMarkers (dispatch) {
 		myID = playerId
     })
 	
-	dispatch.hook('S_PARTY_MARKER', 1, {order: 100, filter: {fake: null}}, ({markers}) => {	
-		RealMarkers = markers
-		//console.log("S_PARTY_MARKER")
-		//console.log(markers)
+	dispatch.hook('S_PARTY_MARKER', 1, {order: 100, filter: {fake: null}}, ({markers}) => {
+		if(!sending)
+		{
+			RealMarkers = markers
+			//console.log("S_PARTY_MARKER")
+			//console.log(markers)
+		}
     })
 	
 	dispatch.hook('S_CHANGE_PARTY_MANAGER', 2, ({playerId}) => {
