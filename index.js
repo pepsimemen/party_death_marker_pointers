@@ -175,7 +175,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
     })
 	
 	dispatch.hook('S_PARTY_MARKER', 1, {order: 100, filter: {fake: null}}, ({markers}) => {
-		if(!sending)
+		if(!sending && markers.length)
 		{
 			RealMarkers = markers
 			//console.log("S_PARTY_MARKER")
