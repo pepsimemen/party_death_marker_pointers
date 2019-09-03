@@ -194,7 +194,7 @@ module.exports = function PartyDeathMarkers (dispatch) {
 	})
 	
 	dispatch.hook('S_SPAWN_ME', 3, DeadOrAlive)
-	dispatch.hook('S_SPAWN_USER', 13, DeadOrAlive)
+	dispatch.hook('S_SPAWN_USER', 15, DeadOrAlive)
 	dispatch.hook('S_CREATURE_LIFE', 3, DeadOrAlive)
 
 	dispatch.hook('S_LEAVE_PARTY_MEMBER', 2, ({playerId}) => {
