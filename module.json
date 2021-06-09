@@ -1,11 +1,11 @@
 {
-	"disableAutoUpdate": false,
-	"name": "party_death_marker_pointers",
-	"author": "Owyn",
-	"description": "Spawns colored pointy arrows on top of dead party members",
-	"options": {
-		"niceName": "Death Markers"
-	},
-	"servers": ["https://raw.githubusercontent.com/Owyn/party_death_marker_pointers/master/"],
-	"supportUrl": "https://github.com/Owyn/party_death_marker_pointers/issues"
+    "disableAutoUpdate": false,
+    "name": "party_death_marker_pointers",
+    "author": "Owyn, pep",
+    "description": "Spawns colored pointy arrows on top of dead party members",
+    "options": {
+        "niceName": "Death Markers"
+    },
+    "servers": ["https://raw.githubusercontent.com/pepsimemen/party_death_marker_pointers/master/"],
+    "supportUrl": "https://github.com/pepsimemen/party_death_marker_pointers/issues"
 }
